@@ -1,0 +1,11 @@
+method min value = 97.7267459480354
+method min point = (0.3140343971013142, 0.19316541327997971)
+iters_count = 4
+trust min value = 97.72709131858093
+trust min point = (0.32, 0.19)
+========================================
+method min value = 97.17917856241833
+method min point = (0.18099078977703792, -0.7636074038254723)
+iters_count = 8
+trust min value = 98.54628380522739
+trust min point = (0.35, 0.0)

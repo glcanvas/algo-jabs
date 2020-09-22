@@ -108,25 +108,6 @@ def minimize_lambda(a, b, f_a_b, f_grad_a, f_grad_b):
     return argmim
 
 
-def fast_gradient_descent_method(iter_count, a, b, f, f_grad_a, f_grad_b):
-    current_iter = 0
-    points = [(a, b)]
-    ls = [-1]
-    while True:
-        cur_a, cur_b = points[-1]
-        l = minimize_lambda(cur_a, cur_b, f, f_grad_a, f_grad_b)
-        next_a = cur_a - l * f_grad_a(cur_a, cur_b)
-        next_b = cur_b - l * f_grad_b(cur_a, cur_b)
-
-        ls.append(l)
-
-        points.append((next_a, next_b))
-        current_iter += 1
-        if abs(f(cur_a, cur_b) - f(next_a, next_b)) < EPS or current_iter > iter_count:
-            break
-    return points, ls, current_iter
-
-
 def gauss_method(iter_count, a, b, f, f_grad_a, f_grad_b):
     current_iter = 0
     points = [(a, b)]
@@ -198,7 +179,7 @@ def nelder_mead(func_a_b, alpha=1, beta=0.5, gamma=2, max_iter=2_000):
         diff = min(map(lambda x: func_a_b(x[0], x[1]), points[-1])) - min(
             map(lambda x: func_a_b(x[0], x[1]), points[-2]))
         current_iter += 1
-        if current_iter > max_iter: # or abs(diff) < EPS ** 2:
+        if current_iter > max_iter:  # or abs(diff) < EPS ** 2:
             break
     return points, b, current_iter
 
