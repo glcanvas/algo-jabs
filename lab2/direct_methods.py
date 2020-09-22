@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import math
 import os
 
-MAX_ITERATE_NUMBER = 1_000
+MAX_ITERATE_NUMBER = 100
 EPS = 0.001
 
 
