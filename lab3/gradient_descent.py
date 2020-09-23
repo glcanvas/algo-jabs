@@ -174,7 +174,7 @@ def visualize_data_line(data, func, a, b, type):
     plt.scatter([i for (i, _) in data], [j for (_, j) in data], color="blue", label="initial data")
     x_line = [i / 100 for i in range(100)]
     y_line = [func(i, a, b) for i in x_line]
-    plt.plot(x_line, y_line, color="green", label="approximation line: {} {}".format("fast_grad", to_name(func)))
+    plt.plot(x_line, y_line, color="green", label="approximation line: {} {}".format(type, to_name(func)))
     plt.legend()
     plt.savefig(
         "{}\\images_3\\{}_{}_{}.png".format(os.path.dirname(os.path.abspath(__file__)), type, "line", to_name(func)))
@@ -236,26 +236,33 @@ def levenberg_marquardt_method(data, aprox):
     res = optimize.leastsq(f1, np.asarray([0.1, 0.1]))
     print(calculate_lse(data, aprox, res[0][0], res[0][1]))
     print(res)
+    visualize_data_line(data, aprox, res[0][0], res[0][1], "levenberg_marquardt_method")
 
+
+import lab2.aproximations as ap
 
 if __name__ == "__main__":
+    lse = lambda a, b, m: sum([(m(x, a, b) - y) ** 2 for (x, y) in data])
     data = generate_data()
-    """
-    visualize(data, approx_func_linear, approx_func_linear_grad_a, approx_func_linear_grad_b)
-    print("=" * 40)
+
     visualize(data, approx_func_rational, approx_func_rational_grad_a, approx_func_rational_grad_b)
-    """
-    #print("=" * 40)
-    #conjugate_gradient_descent(data, approx_func_linear, approx_func_linear_grad_a, approx_func_linear_grad_b)
-    #print("=" * 40)
+    print("=" * 40)
     conjugate_gradient_descent(data, approx_func_rational, approx_func_rational_grad_a, approx_func_rational_grad_b)
     print("=" * 40)
-
-    # newton_method(data, approx_func_linear, approx_func_linear_grad_a, zero, zero,
-    #              approx_func_linear_grad_b, zero, zero)
-
-    # newton_method(data, approx_func_rational, approx_func_rational_grad_a, approx_func_rational_grad_a_a,
-    #              approx_func_rational_grad_a_b,
-    #              approx_func_rational_grad_b, approx_func_rational_grad_a_b, approx_func_rational_grad_b_b)
-
+    newton_method(data, approx_func_rational, approx_func_rational_grad_a, zero, zero,
+                  approx_func_rational_grad_b, zero, zero)
+    print("=" * 40)
     levenberg_marquardt_method(data, approx_func_rational)
+
+    print("=" * 40)
+    gauss_rational, gauss_rational_iter = ap.visualize_newton_or_gauss_or_whatever(data, ap.gauss_method,
+                                                                               approx_func_rational,
+                                                                               approx_func_rational_grad_a,
+                                                                               approx_func_rational_grad_b)
+    print("gauss_rational", gauss_rational, "iter", gauss_rational_iter,
+          lse(gauss_rational[0], gauss_rational[1], approx_func_rational))
+    print("=" * 40)
+    nelder_rational, nelder_rational_iters = ap.visualize_nelder_mead(data, approx_func_rational)
+    print("nelder_mead_rational", nelder_rational, "iter", nelder_rational_iters,
+          lse(nelder_rational[0], nelder_rational[1], approx_func_rational))
+

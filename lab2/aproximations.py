@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import math
 import os
 import lab2.direct_methods as dm
+from scipy import optimize
 
 EPS = 0.001
 
@@ -78,7 +79,7 @@ def visualize_data(data, a, b, name_1, name_2):
     plt.scatter([v for (v, _) in data], [v for (_, v) in data], color="red", label="initial data")
     plt.plot(x_line, y_line, color="green", label="approximation line: {} {}".format(name_1, name_2))
     plt.legend()
-    plt.savefig("{}\\images_2\\{}-{}.png".format(os.path.dirname(os.path.abspath(__file__)), name_1, name_2))
+    plt.savefig("{}\\images_3\\{}-{}.png".format(os.path.dirname(os.path.abspath(__file__)), name_1, name_2))
     plt.clf()
 
 
@@ -115,11 +116,11 @@ def gauss_method(iter_count, a, b, f, f_grad_a, f_grad_b):
     while True:
         cur_a, cur_b = points[-1]
         if len(points) % 2 == 0:
-            _, _, _, l, _ = dm.golden_search(lambda l1: f(l1, cur_b), 0, 1e9)
+            l = optimize.golden(lambda l1: f(l1, cur_b), brack=(-1, 1))
             next_a = l
             next_b = cur_b
         else:
-            _, _, _, l, _ = dm.golden_search(lambda l1: f(cur_a, l1), 0, 1e9)
+            l = optimize.golden(lambda l1: f(cur_a, l1), brack=(-1, 1))
             next_a = cur_a
             next_b = l
         ls.append(l)
@@ -139,7 +140,11 @@ def visualize_newton_or_gauss_or_whatever(data, method, apox, aprox_grad_a, apro
 
 
 def nelder_mead(func_a_b, alpha=1, beta=0.5, gamma=2, max_iter=2_000):
-    a = (0.0, 0.0001)
+    res = optimize.minimize(lambda x: func_a_b(x[0], x[1]), np.array((0, 0)), method='Nelder-Mead')
+    print(res)
+
+    return [], res.x, 0
+    """a = (0.0, 0.0001)
     b = (0.25, 0.0001)
     c = (0.0001, 0.25)
     points = [[a, b, c]]
@@ -182,7 +187,7 @@ def nelder_mead(func_a_b, alpha=1, beta=0.5, gamma=2, max_iter=2_000):
         if current_iter > max_iter:  # or abs(diff) < EPS ** 2:
             break
     return points, b, current_iter
-
+    """
 
 def visualize_nelder_mead(data, apox):
     f_a_b, _, _ = build_differencial(data, apox, lambda a, b, c: 0, lambda a, b, c: 0)
