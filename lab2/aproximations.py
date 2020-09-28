@@ -131,11 +131,12 @@ def gauss_method(iter_count, a, b, f, f_grad_a, f_grad_b):
     return points, ls, current_iter
 
 
-def visualize_newton_or_gauss_or_whatever(data, method, apox, aprox_grad_a, aprox_grad_b):
+def visualize_newton_or_gauss_or_whatever(data, method, apox, aprox_grad_a, aprox_grad_b, L):
     f_a_b, f_grad_a_a_b, f_grad_b_a_b = build_differencial(data, apox, aprox_grad_a, aprox_grad_b)
     points, ls, iters = method(100, 1, 1, f_a_b, f_grad_a_a_b, f_grad_b_a_b)
 
     visualize_data(data, points[-1][0], points[-1][1], to_name(method), to_name(apox))
+    L.append((points[-1], "gauss_linear", apox))
     return points[-1], iters
 
 
@@ -189,11 +190,12 @@ def nelder_mead(func_a_b, alpha=1, beta=0.5, gamma=2, max_iter=2_000):
     return points, b, current_iter
     """
 
-def visualize_nelder_mead(data, apox):
+def visualize_nelder_mead(data, apox, L:list):
     f_a_b, _, _ = build_differencial(data, apox, lambda a, b, c: 0, lambda a, b, c: 0)
     _, best, iters = nelder_mead(f_a_b)
 
     visualize_data(data, best[0], best[1], "nelder_mead", to_name(apox))
+    L.append((best, "nelder_mead", apox))
     return best, iters
 
 

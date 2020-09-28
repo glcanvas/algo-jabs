@@ -8,6 +8,9 @@ from scipy import optimize
 EPS = 0.001
 OFFSET = 0
 
+# in format (ptr, name)
+LIST_OF_METHODS = []
+
 
 def to_name(method):
     return method.__name__.replace('_', ' ').capitalize()
@@ -201,6 +204,7 @@ def visualize(data, apox, aprox_grad_a, aprox_grad_b):
     plt.clf()
 
     visualize_data_line(data, apox, pts[-1][0], pts[-1][1], "fast_grad")
+    LIST_OF_METHODS.append((pts[-1], "fast_grad", apox))
 
 
 def conjugate_gradient_descent(data, aprox, aprox_grad_a, aprox_grad_b):
@@ -211,6 +215,7 @@ def conjugate_gradient_descent(data, aprox, aprox_grad_a, aprox_grad_b):
     res = optimize.fmin_cg(f, x0=x0, fprime=fprime)
     print(res)
     visualize_data_line(data, aprox, res[0], res[1], "sgd")
+    LIST_OF_METHODS.append(((res[0], res[1]), "sgd", aprox))
 
 
 def newton_method(data, aprox, aprox_grad_a, aprox_grad_a_a, aprox_grad_a_b, aprox_grad_b, aprox_grad_b_a,
@@ -227,6 +232,7 @@ def newton_method(data, aprox, aprox_grad_a, aprox_grad_a_a, aprox_grad_a_b, apr
     res = optimize.minimize(f, np.asarray((0.1, 0.2)), jac=fprime, hess=fprime2, method="Newton-CG")
     print(res)
     visualize_data_line(data, aprox, res.x[0], res.x[1], "newton")
+    LIST_OF_METHODS.append((res.x, "newton", aprox))
 
 
 def levenberg_marquardt_method(data, aprox):
@@ -237,6 +243,25 @@ def levenberg_marquardt_method(data, aprox):
     print(calculate_lse(data, aprox, res[0][0], res[0][1]))
     print(res)
     visualize_data_line(data, aprox, res[0][0], res[0][1], "levenberg_marquardt_method")
+    LIST_OF_METHODS.append((res[0], "levenberg_marquardt_method", aprox))
+
+
+def visualize_list(data):
+    plt.clf()
+    unique = set()
+    plt.scatter([i for (i, _) in data], [j for (_, j) in data], color="blue", label="initial data")
+    for ((a, b), type, func) in LIST_OF_METHODS:
+        if type in unique:
+            continue
+        unique.add(type)
+        x_line = [i / 100 for i in range(100)]
+        y_line = [func(i, a, b) for i in x_line]
+        plt.plot(x_line, y_line, label="approximation line: {} {}".format(type, to_name(func)))
+        print("WTF", type, (a, b))
+    plt.legend()
+    plt.savefig(
+        "{}\\images_3\\{}_all.png".format(os.path.dirname(os.path.abspath(__file__)), to_name(LIST_OF_METHODS[0][2])))
+    plt.clf()
 
 
 import lab2.aproximations as ap
@@ -244,6 +269,7 @@ import lab2.aproximations as ap
 if __name__ == "__main__":
     lse = lambda a, b, m: sum([(m(x, a, b) - y) ** 2 for (x, y) in data])
     data = generate_data()
+
 
     visualize(data, approx_func_rational, approx_func_rational_grad_a, approx_func_rational_grad_b)
     print("=" * 40)
@@ -253,16 +279,18 @@ if __name__ == "__main__":
                   approx_func_rational_grad_b, zero, zero)
     print("=" * 40)
     levenberg_marquardt_method(data, approx_func_rational)
-
+    print("levenberg_marquardt_method")
     print("=" * 40)
     gauss_rational, gauss_rational_iter = ap.visualize_newton_or_gauss_or_whatever(data, ap.gauss_method,
                                                                                approx_func_rational,
                                                                                approx_func_rational_grad_a,
-                                                                               approx_func_rational_grad_b)
+                                                                               approx_func_rational_grad_b, LIST_OF_METHODS)
     print("gauss_rational", gauss_rational, "iter", gauss_rational_iter,
           lse(gauss_rational[0], gauss_rational[1], approx_func_rational))
     print("=" * 40)
-    nelder_rational, nelder_rational_iters = ap.visualize_nelder_mead(data, approx_func_rational)
+    nelder_rational, nelder_rational_iters = ap.visualize_nelder_mead(data, approx_func_rational, LIST_OF_METHODS)
     print("nelder_mead_rational", nelder_rational, "iter", nelder_rational_iters,
           lse(nelder_rational[0], nelder_rational[1], approx_func_rational))
 
+    visualize_list(data)
+    LIST_OF_METHODS.clear()
